@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String               @id @default(cuid())
+  email                String?              @unique
+  passwordHash         String?
+  displayName          String?
+  currentBalanceUsd    Float                @default(0)
+  onboardingComplete   Boolean              @default(false)
+  createdAt            DateTime             @default(now())
+  categoryBudgets      CategoryBudget[]
+  events               Event[]
+  expenses             TrackedExpense[]
+  userCategories       UserCategory[]
+  monthCategoryBudgets MonthCategoryBudget[]
+}
+
+model UserCategory {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slug       String
+  name       String
+  colorIndex Int      @default(0)
+  isBuiltIn  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, slug])
+}
+
+model CategoryBudget {
+  id               String @id @default(cuid())
+  userId           String
+  user             User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category         String
+  monthlyAmountUsd Float
+
+  @@unique([userId, category])
+}
+
+model MonthCategoryBudget {
+  id               String @id @default(cuid())
+  userId           String
+  user             User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  yearMonth        String
+  categorySlug     String
+  monthlyAmountUsd Float
+
+  @@unique([userId, yearMonth, categorySlug])
+}
+
+model Event {
+  id               String    @id @default(cuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title            String
+  startAt          DateTime
+  endAt            DateTime
+  category         String
+  estimatedCostUsd Float?
+  /** null = one-off; otherwise repeat rule from anchor startAt */
+  recurrence       String?
+  recurrenceEnd    DateTime?
+  /** Optional tag: rent | utilities | subscription */
+  expenseKind      String?
+  createdAt        DateTime  @default(now())
+}
+
+model TrackedExpense {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId       String?
+  /** Empty for one-off events; occurrence start epoch ms string for recurring instances */
+  occurrenceKey String   @default("")
+  amountUsd     Float
+  category      String
+  createdAt     DateTime @default(now())
+
+  @@unique([userId, eventId, occurrenceKey])
+}
