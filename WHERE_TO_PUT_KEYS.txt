@@ -1,0 +1,26 @@
+Where to put secrets (local + Vercel)
+========================================
+
+1) Local development
+   • Copy `.env.example` → `.env`
+   • Fill SESSION_SECRET, SUPABASE_URL, SUPABASE_ANON_KEY
+   • Optional mirrors for the SPA: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_APP_URL
+   • Apply DB schema once: open Supabase → SQL Editor → paste and run
+     `supabase/migrations/20260221190000_app_schema.sql`
+
+2) Vercel (Project → Settings → Environment Variables)
+   • SESSION_SECRET (openssl rand -hex 32)
+   • SUPABASE_URL, SUPABASE_ANON_KEY (server)
+   • Optional: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_APP_URL (browser bundle)
+   • Leave VITE_API_URL unset for same-origin /api (recommended)
+   • No service_role key is required in this architecture
+
+3) After changing vercel.json
+   • Redeploy so /api/* rewrites reach the Express serverless entry
+   • Preview URLs may use Deployment Protection — use Production or a bypass token for curl
+
+4) End-to-end tests (`npm test`)
+   • Set the same Supabase variables in the environment (or rely on `.env` if loaded).
+   • Requires URL + anon key (and the SQL migration with RLS policies applied).
+   • Opt-in remote e2e execution with `RUN_SUPABASE_E2E=1 npm test` (otherwise skipped).
+   • `tests/eventIds.test.ts` always runs; Supabase scenarios skip if env is incomplete.
