@@ -5,7 +5,7 @@ import {
   addYears,
   differenceInMilliseconds,
 } from "date-fns";
-import type { Event } from "@prisma/client";
+import type { StoredEvent } from "./models.js";
 
 export const RECURRENCE_RULES = ["daily", "weekly", "monthly", "yearly"] as const;
 export type RecurrenceRule = (typeof RECURRENCE_RULES)[number];
@@ -52,7 +52,7 @@ export type ExpandedOccurrence = {
 /** Expand a stored event into occurrences overlapping [windowStart, windowEnd]. */
 export function expandEventOccurrences(
   event: Pick<
-    Event,
+    StoredEvent,
     "startAt" | "endAt" | "recurrence" | "recurrenceEnd"
   >,
   windowStart: Date,

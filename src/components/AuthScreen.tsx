@@ -16,6 +16,12 @@ const errorMessages: Record<string, string> = {
   invalid_credentials: "Email or password is incorrect.",
   register_failed: "Could not create account. Try again.",
   login_failed: "Could not sign in. Try again.",
+  confirm_email_required:
+    "Account created, but email confirmation is required before you can sign in. Check your inbox (or disable email confirmation in Supabase Auth settings).",
+  database_unavailable:
+    "Cannot reach Supabase right now. Unpause the project and verify SUPABASE_URL / SUPABASE_ANON_KEY in Vercel.",
+  database_schema_missing:
+    "Tables are missing. In Supabase SQL Editor, run supabase/migrations/20260221190000_app_schema.sql",
 };
 
 const inputClass =
@@ -159,8 +165,7 @@ export function AuthScreen({ onAuthenticated }: Props) {
                 />
               </label>
               <p className="text-xs leading-relaxed text-[var(--app-text-muted)]">
-                Your profile (email, display name, and encrypted password) is stored in this app’s
-                local database on your machine. Each account has its own calendar and budget data.
+                Your account and planner data are stored in your Supabase project.
               </p>
             </>
           )}

@@ -1,10 +1,10 @@
 # Finance Calendar Insights
 
-An Outlook-style week calendar with a **Finance Insights** sidebar. Data is stored in **SQLite** via a small **Express** API so events, budgets, and tracked spend persist across sessions.
+An Outlook-style week calendar with a **Finance Insights** sidebar. Data is stored in **Supabase Postgres** via **Supabase Auth** and a small **Express** API (anon key + user JWT + RLS policies).
 
 ## Features
 
-- **SQLite persistence** — events, per-category monthly budgets, balance, and tracked expenses.
+- **Supabase persistence** — events, per-category monthly budgets, balance, and tracked expenses.
 - **First-run onboarding** — starting balance and a **monthly budget per category** (Social, Work, Travel, Health, Other).
 - **Week view** — double-click an empty time slot to create an event (single-click still selects an event).
 - **Finance Insights** — **week-level** summary (estimated spend this week, per-category breakdown, month-to-date totals) plus **selected-event** detail when you pick an event.
@@ -18,13 +18,15 @@ An Outlook-style week calendar with a **Finance Insights** sidebar. Data is stor
 ```bash
 cd finance-calendar-insights
 npm install
-npx prisma db push
+cp .env.example .env
+# Edit .env: SESSION_SECRET, SUPABASE_URL, SUPABASE_ANON_KEY
+# In Supabase → SQL Editor, run supabase/migrations/20260221190000_app_schema.sql once
 npm run dev
 ```
 
 This runs **two processes**: the API on `http://127.0.0.1:3001` and Vite on `http://localhost:5173` (with `/api` proxied to the API). Open the Vite URL in your browser.
 
-The database file is created at `prisma/dev.db` (see `DATABASE_URL` in `.env`).
+See `.env.example` and `WHERE_TO_PUT_KEYS.txt` for Vercel vs local variables (`VITE_*` are browser-safe mirrors only).
 
 ## Build
 
@@ -52,7 +54,7 @@ git push -u origin main
 ## Stack
 
 - React 19, TypeScript, Vite 6, Tailwind CSS 4
-- Express, Prisma, SQLite
+- Express + Supabase JS server client (no Prisma)
 
 ## License
 
