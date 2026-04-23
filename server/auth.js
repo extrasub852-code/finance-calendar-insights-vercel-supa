@@ -1,26 +1,46 @@
-import bcrypt from "bcryptjs";
-import { prisma } from "./db.js";
+import { loadAppUser } from "./repository.js";
+import { supabaseAuthClient } from "./supabaseClients.js";
 export function normalizeEmail(email) {
     return email.trim().toLowerCase();
 }
-export async function hashPassword(plain) {
-    return bcrypt.hash(plain, 10);
-}
-export async function verifyPassword(plain, hash) {
-    return bcrypt.compare(plain, hash);
-}
 export async function requireAuth(req, res, next) {
-    const uid = req.session?.userId;
-    if (!uid || typeof uid !== "string") {
-        res.status(401).json({ error: "unauthorized" });
-        return;
+    try {
+        const auth = req.session?.auth;
+        const token = auth?.access_token;
+        if (!token || typeof token !== "string") {
+            res.status(401).json({ error: "unauthorized" });
+            return;
+        }
+        const sb = supabaseAuthClient();
+        const { data, error } = await sb.auth.getUser(token);
+        if (error || !data.user) {
+            req.session = null;
+            res.status(401).json({ error: "unauthorized" });
+            return;
+        }
+        const user = await loadAppUser(token, data.user.id, data.user.email ?? null);
+        if (!user) {
+            req.session = null;
+            res.status(401).json({ error: "unauthorized" });
+            return;
+        }
+        req.accessToken = token;
+        req.user = user;
+        next();
     }
-    const user = await prisma.user.findUnique({ where: { id: uid } });
-    if (!user) {
-        req.session = null;
-        res.status(401).json({ error: "unauthorized" });
-        return;
+    catch (e) {
+        console.error(e);
+        res.status(503).json({ error: "database_unavailable" });
     }
-    req.user = user;
-    next();
+}
+export function setSessionAuth(req, session) {
+    if (!req.session)
+        return;
+    req.session.auth = session;
+}
+export function clearSessionAuth(req) {
+    if (req.session) {
+        req.session.auth = undefined;
+    }
+    req.session = null;
 }

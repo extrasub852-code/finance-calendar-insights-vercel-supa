@@ -1,4 +1,4 @@
-import type { Event } from "@prisma/client";
+import type { StoredEvent } from "./models.js";
 import { composeCalendarEventId } from "./eventIds.js";
 import { expandEventOccurrences, normalizeRecurrence } from "./recurrence.js";
 
@@ -35,7 +35,7 @@ export function expansionWindowForYearMonth(yearMonth: string): {
 }
 
 export function expandStoredEventsForWindow(
-  rows: Event[],
+  rows: StoredEvent[],
   windowStart: Date,
   windowEnd: Date,
 ): ApiEventDto[] {

@@ -1,9 +1,10 @@
-import type { User } from "@prisma/client";
+import type { AppUser } from "./models.js";
 
 declare global {
   namespace Express {
     interface Request {
-      user?: User;
+      user?: AppUser;
+      accessToken?: string;
     }
   }
 }

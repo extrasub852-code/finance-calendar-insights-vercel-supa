@@ -16,6 +16,10 @@ const errorMessages: Record<string, string> = {
   invalid_credentials: "Email or password is incorrect.",
   register_failed: "Could not create account. Try again.",
   login_failed: "Could not sign in. Try again.",
+  database_unavailable:
+    "Cannot reach the database. Unpause the Supabase project, set DATABASE_URL on Vercel to this project’s URI, or try the Session pooler connection (port 5432) from Database settings.",
+  database_schema_missing:
+    "Tables are missing. In Supabase SQL Editor, run supabase/migrations/20260221190000_app_schema.sql",
 };
 
 const inputClass =
